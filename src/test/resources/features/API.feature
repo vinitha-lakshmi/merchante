@@ -24,7 +24,6 @@ Scenario Outline: Verify comments api is working correctly
 	 	|User			|Comment					|Sport		|
 	 	|Vinitha		|Soccer game is awesome		|Soccer		|
 	 	
-	 	
 @USERAPI @API
 Scenario: Verify users api is working correctly
 	Given I set the user data
