@@ -21,23 +21,27 @@ public class CommentsStepDef extends BaseTest {
 
 	@Given("^I comment data \"([^\"]*)\" and \"([^\"]*)\" and \"([^\"]*)\"$")
 	public void i_comment_data_and(String user, String comment, String sport) throws Throwable {
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// Generate payload using DTO and RequestParams
 		dto = new CommentDTO(user,comment,sport);
 		request.body(getRequestParams(dto));
+		
+		// POST
 		Response response = request.contentType(ContentType.JSON).post(commentsURI);
 
-		// Verify Response code is 201
+		// Verify Response status code is 201
 		int responseCode = response.getStatusCode();
 		assertTrue("Response status code is not 200", responseCode == 201);
 
-		// Verify response ID
+		// Verify response
 		JSONObject jsonObject = getJsonParse(response);
 		if (jsonObject != null && jsonObject.get("id").toString() != "") {
-			dto.setId(jsonObject.get("id").toString());
+			dto.setId(jsonObject.get("id").toString()); // set ID in DTO
 		} else {
 			assertTrue("Exception parsing response JSON", false);
-
 		}
 
 		logger.info("POST successful with ID: " + dto.getId());
@@ -45,14 +49,18 @@ public class CommentsStepDef extends BaseTest {
 
 	@Then("^I get the comment data to verify it$")
 	public void i_get_the_comment_data_to_verify_it() throws Throwable {
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// GET
 		Response response = request.get(commentsURI + dto.getId());
 
-		// Verify Response code is 200
+		// Verify Response status code is 200
 		int responseCode = response.getStatusCode();
 		assertTrue("Response status code is not 200", responseCode == 200);
 
+		// Verify response data matches our request data
 		JSONObject jsonObject = getJsonParse(response);
 		if (jsonObject != null) {
 			String user = jsonObject.get("user").toString();
@@ -70,13 +78,17 @@ public class CommentsStepDef extends BaseTest {
 
 	@Then("^I update the comment data \"([^\"]*)\" and \"([^\"]*)\" and \"([^\"]*)\"$")
 	public void i_update_the_comment_data_and(String user, String comment, String sport) throws Throwable {
+		getMethodName();
+		RestAssured.baseURI = endPoint;
+		RequestSpecification request = RestAssured.given();
+
+		// Generate payload using DTO and RequestParams
 		dto.setuser(user);
 		dto.setcomment(comment);
 		dto.setSport(sport);
-
-		RestAssured.baseURI = endPoint;
-		RequestSpecification request = RestAssured.given();
 		request.body(getRequestParams(dto));
+
+		// PUT
 		Response response = request.contentType(ContentType.JSON).put(commentsURI + dto.getId());
 
 		// Verify Response code is 200
@@ -87,12 +99,16 @@ public class CommentsStepDef extends BaseTest {
 	}
 
 	@Then("^I delete the comment data$")
-	public void i_delete_the_comment_data() throws Throwable {
+	public void i_delete_the_comment_data() throws Throwable { // common methods can be moved to base class
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
-		Response response = request.delete(commentsURI + dto.getId());
-		logger.error("Delete status code: " + response.getStatusCode());
 
+		// DELETE
+		Response response = request.delete(commentsURI + dto.getId());
+		logger.error("Delete status code: " + response.getStatusCode()); // as response has error logging for now without failing
+
+		// Verify delete is successful
 		response = request.get(commentsURI + dto.getId());
 		JSONObject jsonObject = getJsonParse(response);
 		assertTrue("Exception deleting ID" + dto.getId(), jsonObject.isEmpty());

@@ -21,24 +21,28 @@ public class PostsStepDef extends BaseTest {
 
 	@Given("^I post data \"([^\"]*)\" and \"([^\"]*)\"$")
 	public void i_post_data_and(String fName, String lName) throws Throwable {
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// Generate payload using DTO and RequestParams
 		dto = new PostDTO(fName, lName);
 		dto.setId("BkHc-mb1P");
 		request.body(getRequestParams(dto));
+		
+		// POST
 		Response response = request.contentType(ContentType.JSON).post(postsURI);
 
 		// Verify Response code is 201
 		int responseCode = response.getStatusCode();
 		assertTrue("Response status code is not 200", responseCode == 201);
 
-		// Verify response ID
+		// Verify response
 		JSONObject jsonObject = getJsonParse(response);
 		if (jsonObject != null && jsonObject.get("id").toString() != "") {
 			dto.setId(jsonObject.get("id").toString());
 		} else {
 			assertTrue("Exception parsing response JSON", false);
-
 		}
 
 		logger.info("POST successful with ID: " + dto.getId());
@@ -46,14 +50,18 @@ public class PostsStepDef extends BaseTest {
 
 	@Then("^I get the posts data to verify it$")
 	public void i_get_the_posts_data_to_verify_it() throws Throwable {
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// GET
 		Response response = request.get(postsURI + dto.getId());
 
 		// Verify Response code is 200
 		int responseCode = response.getStatusCode();
 		assertTrue("Response status code is not 200", responseCode == 200);
 
+		// Verify response data matches our request data
 		JSONObject jsonObject = getJsonParse(response);
 		if (jsonObject != null) {
 			String fName = jsonObject.get("firstName").toString();
@@ -64,16 +72,21 @@ public class PostsStepDef extends BaseTest {
 			assertTrue("Exception parsing response JSON", false);
 		}
 
-		logger.info("GET verified successfull for ID: " + dto.getId());
+		logger.info("GET verified successfully for ID: " + dto.getId());
 	}
 
 	@Then("^I update the data \"([^\"]*)\" and \"([^\"]*)\"$")
 	public void i_update_the_data_and(String fName, String lName) throws Throwable {
-		dto.setFirstName(fName);
-		dto.setLastName(lName);
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+
+		// Generate payload using DTO and RequestParams
+		dto.setFirstName(fName);
+		dto.setLastName(lName);
 		request.body(getRequestParams(dto));
+		
+		// PUT
 		Response response = request.contentType(ContentType.JSON).put(postsURI + dto.getId());
 
 		// Verify Response code is 200
@@ -85,11 +98,15 @@ public class PostsStepDef extends BaseTest {
 
 	@Then("^I delete the posts data$")
 	public void i_delete_the_posts_data() throws Throwable {
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// DELETE
 		Response response = request.delete(postsURI + dto.getId());
 		logger.error("Delete status code: " + response.getStatusCode());
 
+		// Verify delete is successful
 		response = request.get(postsURI + dto.getId());
 		JSONObject jsonObject = getJsonParse(response);
 		assertTrue("Exception deleting ID" + dto.getId(), jsonObject.isEmpty());

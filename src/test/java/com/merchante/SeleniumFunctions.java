@@ -7,13 +7,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,5 +160,24 @@ public class SeleniumFunctions {
 
 	public static String getWebElementTextBySelector(String selector) {
 		return driver.findElement(By.cssSelector(selector)).getText();
+	}
+	
+	public static void switchToAlertAndAccept() {
+		Alert alert = driver.switchTo().alert();
+		alert.accept();
+	}
+	
+	public static void selectDropDownBySelector(String selector, String value) {
+		try {
+			Select select = new Select(findElementBySelector(selector));
+			select.selectByVisibleText(value);			
+		}catch (Exception e) {
+			logger.error("Exception selecting drop-downn by selector: " + selector + " : " + e);
+		}
+	}
+	
+	public static void setAttribute(WebElement elem, String attributeName, String attributeValue) {
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		js.executeScript("arguments[0].setAttribute(arguments[1], arguments[2]);", elem, attributeName, attributeValue);
 	}
 }

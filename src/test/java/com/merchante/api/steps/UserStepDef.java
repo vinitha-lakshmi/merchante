@@ -21,17 +21,22 @@ public class UserStepDef extends BaseTest {
 
 	@Given("^I set the user data$")
 	public void i_set_the_user_data() throws Throwable {
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// Hard Coded for understanding. We can get this data from data file (Excel etc)
 		dto = new UserDTO("vinitha lakshmi", "vinitha_lakshmi", "qa@merchante.com", "1150 Sanctuary Parkway", "300", "Alpharetta", "30009", "Merchant eSolutions", "(888) 288-2692", "www.merchante.com");
 		request.body(getRequestParams(dto));
+		
+		// POST
 		Response response = request.contentType(ContentType.JSON).post(usersURI);
 
 		// Verify Response code is 201
 		int responseCode = response.getStatusCode();
 		assertTrue("Response status code is not 200", responseCode == 201);
 
-		// Verify response ID
+		// Verify response
 		JSONObject jsonObject = getJsonParse(response);
 		if (jsonObject != null && jsonObject.get("id").toString() != "") {
 			dto.setId(jsonObject.get("id").toString());
@@ -45,14 +50,18 @@ public class UserStepDef extends BaseTest {
 
 	@Then("^I get the user data to verify it$")
 	public void i_get_the_user_data_to_verify_it() throws Throwable {
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// GET
 		Response response = request.get(usersURI + dto.getId());
 
 		// Verify Response code is 200
 		int responseCode = response.getStatusCode();
 		assertTrue("Response status code is not 200", responseCode == 200);
 
+		// Verify response data matches our request data
 		JSONObject jsonObject = getJsonParse(response);
 		if (jsonObject != null) {
 			 JSONObject companyObj = (JSONObject) jsonObject.get("company");
@@ -67,11 +76,15 @@ public class UserStepDef extends BaseTest {
 
 	@Then("^I update the user data$")
 	public void i_update_the_user_data() throws Throwable {
-		dto.setCompanyName("MerchantE");
-
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// Generate payload using DTO and RequestParams
+		dto.setCompanyName("MerchantE");
 		request.body(getRequestParams(dto));
+		
+		// PUT
 		Response response = request.contentType(ContentType.JSON).put(usersURI + dto.getId());
 
 		// Verify Response code is 200
@@ -83,11 +96,15 @@ public class UserStepDef extends BaseTest {
 
 	@Then("^I delete the user data$")
 	public void i_delete_the_user_data() throws Throwable {
+		getMethodName();
 		RestAssured.baseURI = endPoint;
 		RequestSpecification request = RestAssured.given();
+		
+		// DELETE
 		Response response = request.delete(usersURI + dto.getId());
 		logger.error("Delete status code: " + response.getStatusCode());
 
+		// Verify delete is successful
 		response = request.get(usersURI + dto.getId());
 		JSONObject jsonObject = getJsonParse(response);
 		assertTrue("Exception deleting ID" + dto.getId(), jsonObject.isEmpty());
