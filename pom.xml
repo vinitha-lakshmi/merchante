@@ -65,7 +65,6 @@
 						</executions>
 					</plugin>
 					<plugin>
-						<!-- This plugin is used by cobertura for unit tests -->
 						<artifactId>maven-surefire-plugin</artifactId>
 						<version>2.19.1</version>
 						<configuration>
